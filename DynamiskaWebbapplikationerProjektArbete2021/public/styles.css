@@ -1,0 +1,105 @@
+  /* */
+  
+  body,html{
+    background-image: url('http://getwallpapers.com/wallpaper/full/a/5/d/544750.jpg');
+    padding-bottom: 6em;
+  }
+  
+  
+  .card-body{
+    
+    background-color: rgba(0, 0, 0, 0.452) !important;
+    box-shadow: 0 10px 10px 1px black;
+    }
+  
+    .card{
+      background-color: rgba(0, 0, 0, 0.719);
+    }
+    .form-control{
+      background-color: rgba(0, 0, 0, 0.651) !important;
+      color: white;  
+      margin-bottom: 10px;
+    }
+  
+    .table-responsive, .userInfo{
+  
+        background-color: rgba(0, 0, 0, 0.507) !important;
+        box-shadow: 0 10px 10px 0 black;
+  
+      
+    }
+  /* Bordered form */
+  form {
+  
+      border: 1px solid #f1f1f1;
+    }
+    
+    /* Full-width inputs */
+    input[type=text], input[type=submit] {
+      width: 100%;
+      padding: 7px 5px;
+      display: inline-block;
+      box-sizing: border-box;
+      background-color: white;
+  
+    }
+  
+    input[type=submit] {
+      background-color: #384144c2;
+      border: none;
+      color: white;
+    }
+  
+    input[type=submit]:hover {
+    
+      color: rgb(208, 205, 205);
+      opacity: 0.8;
+    }
+  
+    
+    
+    /* Set a style for all buttons */
+    button {
+      color: white;
+      border-radius: 4px;
+      padding: 14px 20px;
+      margin: 8px 8px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      background-color: #384144c2;
+    }
+    
+    /* Add a hover effect for buttons */
+    button:hover {
+      opacity: 0.8;
+    }
+    
+  
+   form.form-inline{
+    margin-left: 50%; 
+    min-width: 40%; 
+    max-width: 50%; 
+    border: none;
+    color: #f1f1f1;
+   }
+  
+  
+    /* Add padding to containers */
+    .container {
+      padding: 5px;
+      color: white;
+    }
+    
+    div.blocktext {
+      margin-left: auto;
+      margin-right: auto;
+      width: 8em;
+      color: white;
+  }
+  
+  
+     
+  
+  

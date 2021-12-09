@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--KVAR: koppla bort faq från frågor i consumer-->
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Page</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> <!--om ngt ej funkar är det pga denna bla-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+
+</head>
+
+<body>
+    <div class="container" id="app">
+
+
+        <div v-if="currentLoggedInUser.loggedin == true">
+
+            <nav class="navbar navbar-expand-lg">
+                <!-- nav start  -->
+
+                <a class="navbar-brand" style="  color: white;  "><img>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" fill="currentColor"
+                        class="bi bi-person-badge" viewBox="0 0 16 16">
+                        <path d="M6.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                        <path
+                            d="M4.5 0A2.5 2.5 0 0 0 2 2.5V14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2.5A2.5 2.5 0 0 0 11.5 0h-7zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5v10.795a4.2 4.2 0 0 0-.776-.492C11.392 12.387 10.063 12 8 12s-3.392.387-4.224.803a4.2 4.2 0 0 0-.776.492V2.5z" />
+                    </svg></a>
+                <h4>Welcome back {{ currentLoggedInUser.user.username }}!</h4>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav">
+
+                        <form class="form-inline" hidden>
+                            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                            <input class="btn" type="submit" value="Submit" hidden>
+                        </form>
+
+                        <li class="nav-item">
+                            <button v-on:click="logOut()" style="max-width: 50%;
+                  padding: 10px; margin-left: 39em;">Logout </button>
+                        </li>
+                </div>
+            </nav> <!-- nav end  -->
+
+
+
+
+
+            <div class="container" id="app">
+                <!-------------------------------------------------isConsumerOrSuperAdmin START--------------------------------------------------------------------------->
+
+
+                <div v-if="isConsumerOrSuperAdmin == true">
+                    <div class="container">
+
+                    </div>
+                </div>
+
+
+                <div v-if="currentLoggedInUser.user.role == 'Super Admin'">
+                    <!-------------------------------------------------SuperAdmin START--------------------------------------------------------------------------->
+
+                    <div id="container" class="userInfo ml-3 mr-3 mt-3"
+                        style="max-width: 50%; margin-bottom: 2em; color: white; padding: 1em 1em 1em 1em">
+
+                        <table class="table table-sm table-borderd table-responsive-lg table-striped table-hover"
+                            style="color: white;">
+                            <thead>
+                                <tr>
+                                    <th scope="col"> ID</th>
+                                    <th scope="col"> Role</th>
+                                    <th scope="col"> Username</th>
+                                    <th scope="col"> Account State</th>
+                                    <th scope="col"> Edit User </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="userForUpdate in users" v-bind:key="userForUpdate.username"
+                                    style="color: white;">
+                                    <td style="padding-top: 1em;">
+                                        {{ userForUpdate.id }}
+                                    </td>
+
+                                    <td style="padding-top: 1em;">
+                                        {{ userForUpdate.role }}
+                                    </td>
+
+                                    <td style="padding-top: 1em;">
+                                        {{ userForUpdate.username }}
+                                    </td>
+
+                                    <td style="padding-top: 1em;">
+                                        {{ userForUpdate.status }}
+                                    </td>
+
+                                    <td style="padding-top: 1em;">
+                                        <button type="button" class="btn" value="Edit"
+                                            style="color: white; text-align: center; background-color: #384144c2;max-width: 60%;"
+                                            data-toggle="modal"
+                                            v-on:click="showUserInUpdateForm(userForUpdate.username)">Edit</button>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <button type="submit" style="max-width: 40%;" data-toggle="modal" data-target="#addModal">
+                            Add contributor </button>
+
+
+
+                        <div class="modal fade" id="addModal">
+                            <!--Create contributor modal-->
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="addModalLabel" style="color: black;">Create a
+                                            contributor accont</h5>
+                                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close"
+                                            style="max-width: 20%; background-color: #384144c2; color: white;"> X
+
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="formAdd">
+                                            <div class="form-group">
+                                                <label for="username" style="color: #000000;">Username:</label>
+                                                <input type="text" class="form-control" name="addUsername"
+                                                    id="addUsername" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="password" style="color: #000000;">Password:</label>
+                                                <input type="text" class="form-control" name="addPassword"
+                                                    id="addPassword" required>
+                                            </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-dismiss="modal">Close</button>
+                                        <input type="submit" value="Add contributor" v-on:click="addContributor">
+                                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Update Modal Man kan nu se aktuell användar info!-->
+                        <div class="modal fade" id="updateModal">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" style="color: black;">Edit user:
+                                            {{userForUpdate.username}}</h5>
+                                    </div>
+                                    <div class="modal-body" style="max-width: 98%; margin-left: 3px;;">
+                                        <form id="formUpdate" style="border: 0;">
+                                            <div class="form-group">
+                                                <label style="color: black;" for="theId">Id:</label>
+                                                <input style="color: black;" type="text" class="form-control"
+                                                    name="updateId" id="updateId" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="color: black;" for="updateUsername">Username: </label>
+                                                <input style="color: black;" type="text" class="form-control"
+                                                    name="updateUsername" id="updateUsername">
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="color: black;" for="updateRole">Current role: </label>
+                                                <select style="color: black;" type="text" class="form-control"
+                                                    name="updateRole" id="updateRole">
+                                                    <option style="color: black;">Super Admin</option>
+                                                    <option style="color: black;">Consumer</option>
+                                                    <option style="color: black;">Contributor</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="color: black;" for="updateStatus">
+                                                    Status: </label>
+                                                <input style="color: black;" type="text" class="form-control"
+                                                    name="updateStatus" id="updateStatus" readonly>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <!--Superadmin can block and unblock users in rank below-->
+                                                <input v-if="userForUpdate.role != 'Super Admin' " type="button"
+                                                    class="btn btn-primary float-right" value="Unban user"
+                                                    v-on:click="unBanUser"
+                                                    style="margin-left: 20px; width: auto; background-color: #384144c2; color: white;">
+                                                <button v-if="userForUpdate.role != 'Super Admin' " type="button"
+                                                    class="btn btn-success text-center" value="bannUser"
+                                                    v-on:click="bannUser"
+                                                    style="margin: 10px; width: auto; background-color: #384144c2; color: white;">Ban
+                                                    User</button>
+
+                                                <input type="button" class="btn btn-primary float-right" value="Update"
+                                                    v-on:click="updateUser"
+                                                    style="margin:10px; width: auto; background-color: #384144c2; color: white;">
+                                                <!-- <button type="button" class="btn btn-success float-left text-center" value="updateUser"
+                                        v-on:click="updateUser" style="margin: 30px; width: 70px; margin: 10px;"> Update</button> -->
+                                                <button type="button" class="btn btn-danger float-left"
+                                                    v-on:click="deleteUser"
+                                                    style="margin: 10px; width: auto; background-color: #384144c2; color: white;">Delete</button>
+                                                <button type="button" class="float-left" data-dismiss="modal">
+                                                    Close</button>
+                                            </div>
+                                    </div>
+
+
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                    </div> <!-- Container end -->
+
+
+
+
+
+                </div>
+                <!-------------------------------------------------SuperAdmin START--------------------------------------------------------------------------->
+
+
+                
+
+
+            </div>
+            <!-------------------------------------------------isConsumerOrSuperAdmin END--------------------------------------------------------------------------->
+
+            <!-- Question Modal -->
+            <div class="modal fade" id="questionModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="color:black; padding: 9px; margin: 1px 24% 0px auto;border-style: solid double solid double;border-width: 8px; 
+                            border-color: rgba(0, 0, 0, 0.664);
+                            box-shadow: 2px 2px 4px 0px #000000;font-family:myFirstFont;">Ask a question</h5>
+                            <button type="button" class="btn text-center"
+                                style="background-color: #384144c2; color: white;max-width: 40px;" data-dismiss="modal"
+                                aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="formUpdate">
+                                <div class="form-group">
+                                    <label style="color: black;" for="title">Title</label>
+                                    <input style="color: white;" type="text" class="form-control" name="title"
+                                        id="title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label style="color: black;" for="text">Text</label>
+                                    <input style="color: white;" type="text" class="form-control" name="text" id="text"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label style="color: black;" for="category">Category</label>
+                                    <input style="color: white;" type="text" class="form-control" name="category"
+                                        id="category" required>
+                                </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="button" class="btn float-right" value="Ask Question" v-on:click="askQuestion"
+                                style=" background-color: #384144c2; color: white; "></button>
+
+
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div v-if="isConsumerOrSuperAdmin == true || isContributorOrSuperAdmin == true">
+                <!--  <div v-if="isConsumerOrSuperAdmin == true"> START  -->
+
+                <!--/////////////////////////////////////////////SE ANSWERS AND QUESTIONS ////////////////////////////////////////////////////////////-->
+
+
+                <div class="mb-4 shadow-small" style="float:left; width: 90em;">
+
+                    <div class="table-responsive" style="  position:initial;">
+                        <br>
+                        <h4 style="margin:0 0 0 26em; font-family:myFirstFont;">All Questions</h4>
+                        <button class="btn" v-on:click="getAnswer()" style="max-width: 10%; float: right 
+                        ;margin: auto; margin-right: 1%; margin-top: 0; background-color: #384144c2; color: white;">
+                            Close answers</button> <br><br>
+                        <button class="btn" v-on:click="resetMessage" data-target="#questionModal" data-toggle="modal"
+                            type="submit"
+                            style="max-width: 150px; float: left;margin: 1em 10px 10px 10px ;background-color: #384144c2; color: white;">
+                            Ask a question
+                        </button>
+
+                        <label
+                            style="color: white; margin-left: 53em; margin-top: 1.2em; position:absolute;">Categories:</label>
+                        <select
+                            style="color: white; max-width: 150px; float: right;position:relative; margin: 1em 10px 10px 0 ; "
+                            type="text" class="form-control" name="qCategory" id="qCategory">
+                            <option v-on:click="getQuestions()" style="background-color: black;">All</option>
+                            
+
+                            <option v-if="currentLoggedInUser.user.role=='Consumer'"
+                                v-on:click="getUserQuestions(currentLoggedInUser.user.username)"
+                                style="background-color: black;">
+                                My questions</option>
+                                <option v-on:click="getFAQfromCat(cat.qCategory)" style="background-color: black;"
+                                v-for="cat in categories">{{cat.qCategory }}</option>
+                        </select>
+
+                        <table class="table table-sm table-responsive-lg table-striped table-hover"
+                            style="float: initial; ">
+
+
+                            <thead>
+                                <tr v-if="currentLoggedInUser.user.role == 'Consumer'" style="text-align: center;">
+
+                                    <th scope="col" style="color: white;"></th>
+                                    <th scope="col" style="color: white;">Edit</th>
+                                    <th scope="col" style="color: white;">Title</th>
+                                    <th scope="col" style="color: white;">Question</th>
+                                    <th scope="col" style="color: white;">Category</th>
+                                    <th scope="col" style="color: white;">Date of question</th>
+                                    <th scope="col" style="color: white;">User</th>
+                                    <th scope="col" style="color: white;">Answers</th>
+                                    <th scope="col" style="color: white;"></th>
+
+
+
+
+                                </tr>
+                                <tr v-if="currentLoggedInUser.user.role == 'Contributor'" style="text-align: center;">
+
+                                    <th scope="col" style="color: white;"></th>
+                                    <th scope="col" style="color: white;">Answer</th>
+                                    <th scope="col" style="color: white;">Edit</th>
+                                    <th scope="col" style="color: white;"></th>
+                                    <th scope="col" style="color: white;">Title</th>
+                                    <th scope="col" style="color: white;">Question</th>
+                                    <th scope="col" style="color: white;">Category</th>
+                                    <th scope="col" style="color: white;">Date of question</th>
+                                    <th scope="col" style="color: white;">User</th>
+                                   
+                                    <th scope="col" style="color: white;">All answers</th>
+                                </tr>
+
+                                <tr v-if="currentLoggedInUser.user.role == 'Super Admin'" style="text-align: center;">
+
+                                    <th scope="col" style="color: white;"></th>
+                                    <th scope="col" style="color: white;">Edit</th>
+                                    <th scope="col" style="color: white;"></th>
+                                    <th scope="col" style="color: white;">Title</th>
+                                    <th scope="col" style="color: white;">Question</th>
+                                    <th scope="col" style="color: white;">Category</th>
+                                    <th scope="col" style="color: white;">Date of question</th>
+                                    <th scope="col" style="color: white;">User</th>
+
+
+
+
+                                    <th scope="col" style="color: white;">All answers</th>
+
+
+
+                                </tr>
+                            </thead>
+
+
+                            <tbody v-for="FAQ in FAQbyCat">
+
+                                <!--Shows Duplicate questions as FAQ  v-if="FAQ.qDuplicate == 'Duplicate'"-->
+                                <tr style="align-content: space-between; align-self:left;color: white; min-width: 20em;">
+                                    <th scope="row" style="width: min-content;">
+                                    <td v-if="currentLoggedInUser.user.role == 'Contributor'">
+                                        <button type="button" class="btn text-center"
+                                            style="background-color:#384144c2;max-width: 70%; margin-right: 20px; max-height: 50%; color: white;"
+                                            data-toggle="modal" v-on:click="showAnswerForm(FAQ.qID)">Answer</button>
+                                    </td>
+                                    <td
+                                        v-if="currentLoggedInUser.user.username == FAQ.username  || currentLoggedInUser.user.role == 'Contributor' || currentLoggedInUser.user.role == 'Super Admin' ">
+
+                                        <button type="button" class="btn text-center"
+                                            style="background-color: #384144c2;max-width: 70%; margin-right: 20px; max-height: 50%; color: white;"
+                                            data-toggle="modal"
+                                            v-on:click="showQuestionInUpdateForm(FAQ.qID)">Edit</button>
+
+                                    </td>
+                                    <td v-if="currentLoggedInUser.user.username != FAQ.username && currentLoggedInUser.user.role == 'Consumer'">
+                                        <button type="button" class="btn text-center"
+                                            style="background-color: #384144c2;max-width: 70%; margin-right: 20px; max-height: 50%; color: white;"
+                                            data-toggle="modal" v-on:click="showQuestionInUpdateForm(FAQ.qID)"
+                                            disabled>Edit</button>
+
+                                    </td>
+                                    <td v-if="currentLoggedInUser.user.role != 'Consumer'">{{  }}</td>
+
+                                    <td style="padding-top: 1em;">{{ FAQ.qTitle }}</td>
+                                    <td style="padding-top: 1em;">{{ FAQ.qText }}</td>
+                                    <td style="text-align: center;padding-top: 1em;">{{ FAQ.qCategory }}</td>
+                                    <td style="text-align: center;padding-top: 1em;">{{ FAQ.date }}</td>
+                                    <td style="text-align: center;padding-top: 1em;">{{ FAQ.username }}</td>
+
+
+                                    <td>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                            fill="currentColor" viewBox="0 0 16 16" data-toggle="collapse"
+                                            href="#multiCollapseExample1" role="button" aria-expanded="true"
+                                            aria-controls="multiCollapseExample1" v-on:click="getAnswer(FAQ.qID)"
+                                            style="margin-left:40%; margin-top: 10%;">
+                                            <path
+                                                d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z" />
+                                        </svg>
+                                    </td>
+
+
+                                    </th>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                </div><!-- Questions table end-->
+
+                    <!--/////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+
+                    <div class="container">
+
+                        <!-- Update question Modal -->
+                        <div class="modal fade" id="answerQuestionModal">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" style="color:black; padding: 9px; margin: 1px 35% 0px auto;border-style: solid double solid double;border-width: 8px; 
+                                    border-color: rgba(0, 0, 0, 0.664);
+                                    box-shadow: 2px 2px 4px 0px #000000;font-family:myFirstFont;">Answer Question</h5>
+                                    </div>
+                                    <div class="modal-body" style="max-width: 98%; margin-left: 3px; ">
+                                        <form id="formUpdate" style="border: 0;">
+                                            <div class="form-group">
+                                                <label style="color: black;" for="qIDs">Question ID:</label>
+                                                <input type="text" class="form-control" name="qIDs" id="qIDs" readonly>
+                                            </div>
+
+
+                                            <div class="form-group">
+                                                <label style="color: black;" for="text">Answer here:</label>
+                                                <input required style="color: white;" type="text" class="form-control"
+                                                    name="text" id="text">
+                                            </div>
+
+                                            <div class="form-group" style="margin-left: 4em;">
+
+                                                <div class="modal-footer">
+                                                    <input type="button" class="btn float-right"
+                                                        value="Submit your answer" v-on:click="answerQuestion()"
+                                                        style="  background-color: #384144c2; color: white; "></button>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn  float-left text-center"
+                                                data-dismiss="modal" v-on:click="resetMessage"
+                                                style="background-color: #384144c2; color: white;"> Close</button>
+                                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                   
+
+                    <div class="container">
+
+                        <!-- Update question Modal -->
+                        <div class="modal fade" id="updateQuestionModal">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" style="color:black; padding: 9px; margin: 1px 35% 0px auto;border-style: solid double solid double;border-width: 8px; 
+                                    border-color: rgba(0, 0, 0, 0.664);
+                                    box-shadow: 2px 2px 4px 0px #000000;font-family:myFirstFont;">Edit question</h5>
+                                    </div>
+                                    <div class="modal-body" style="max-height:inherit; max-width: 98%;">
+                                        <form id="formUpdate"
+                                            style="border:0; font-family: myFirstFont; margin:0 3px 0 3px;">
+                                            <div class="form-group" style="margin-top: 0;">
+                                                <label style="color: black;" for="qID">Id:</label>
+                                                <input style="color: white;" type="text" class="form-control" name="qID"
+                                                    id="qID" readonly>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label style="color: black;" for="qUsername">Username: </label>
+                                                <input style="color: white;" type="text" class="form-control"
+                                                    name="qUsername" id="qUsername" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="color: black;" for="qCategory">Category: </label>
+                                                <select style="color: white;" type="text" class="form-control"
+                                                    name="qCategory" id="qCategory">
+                                                    <option v-for="question in questions">{{ question.qCategory }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="color: black;" for="qDuplicate">Duplicate: </label>
+                                                <select style="color: white;" type="text" class="form-control"
+                                                    name="qDuplicate" id="qDuplicate">
+                                                    <option>{{ question.qDuplicate }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="color: black;" for="qTitle">
+                                                    Title: </label>
+                                                <input style="color: white;" type="text" class="form-control"
+                                                    name="qTitle" id="qTitle">
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="color: black;" for="qText">
+                                                    Text: </label>
+                                                <input style="color: white;" type="text" class="form-control"
+                                                    name="qText" id="qText">
+                                            </div>
+
+
+                                            <!-- All buttons for update form -->
+                                            <div class="form-group"
+                                                style="align-content: center; margin-top: 10px;max-width: 70%;max-height: 50%;">
+                                                <!-- Update question -->
+                                                <input type="button" class="btn float-right" value="Update"
+                                                    v-on:click="updateQuestion()"
+                                                    style=" background-color: #384144c2; color: white; width: auto;  ">
+
+                                                <!-- Delete question -->
+                                                <button type="button" class="btn float-left" v-on:click="deleteQuestion"
+                                                    style="width: auto;  background-color: #384144c2; color: white;">Delete</button>
+
+                                                <!--Lable question duplicate  -->
+                                                <input v-if="currentLoggedInUser.user.role == 'Contributor' "
+                                                    type="button" class="btn float-right" value="Duplicate"
+                                                    v-on:click="lableDuplicate()"
+                                                    style=" width: auto; background-color: #384144c2; color: white; ">
+
+                                            </div>
+                                            <button type="button" class="btn float-left text-center"
+                                                data-dismiss="modal" v-on:click="resetMessage"
+                                                style="background-color: #384144c2; color: white;  margin: 0;">
+                                                Close</button>
+                                            <div>
+                                                <div v-if="msg == true"
+                                                    class="alert  alert-warning alert-dismissible fade show"
+                                                    role="alert" style="margin-top: 15px;">
+                                                    This question is already marked as a duplicate!</div>
+                                            </div>
+
+                                    </div>
+
+
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                <div class="container" style=" min-width: 110.1%;">
+
+                    <!--   v-bind="answer.answerID" -->
+                    <div class="panel-group" id="accordion"
+                        style="color:white; margin-left: 0.5em; margin-right: 5x; background-color: rgba(0, 0, 0, 0);">
+
+                        <div class="card" id="accordion" v-for="answer in answer"
+                            style="background-color: rgba(0, 0, 0, 0);">
+
+
+                            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                                data-parent="#accordion" v-for="answers in answers" >
+
+                                <div class="card card-body" v-if="answers.answerID == answer.answerID"
+                                    style="align-self: flex-start; margin-top: 20px; margin-bottom: auto; ">
+
+
+                                    <div>
+                                       
+                                        <h4> Username: {{ answer.username}} </h4>
+                                        <p style="margin-top: 2px;">Date: {{ answer.date }}</p>
+                                        <br>
+
+                                        <h4>Answer:</h4>
+                                        <p class="card card-body" style="text-align: center;">
+                                            <br><br> {{answer.answerText}}</p>
+                                        </div>                                        
+                                        
+                                        
+                                        <div style="margin: auto; margin-top: 20px; margin-left: 39.5em;">
+                                            &nbsp;{{answers.upvote}}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"
+                                                fill="currentColor" class="bi bi-hand-thumbs-up-fill" role="button"
+                                                v-on:click="upVote(answer.answerID)" viewBox="0 0 16 16"
+                                                style="align-self:flex-end; margin-right: 1em;">
+                                                <path style="text-align:flex-end;"
+                                                    d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.964.22.817.533 2.512.062 4.51a9.84 9.84 0 0 1 .443-.05c.713-.065 1.669-.072 2.516.21.518.173.994.68 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.162 3.162 0 0 1-.488.9c.054.153.076.313.076.465 0 .306-.089.626-.253.912C13.1 15.522 12.437 16 11.5 16H8c-.605 0-1.07-.081-1.466-.218a4.826 4.826 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.616.849-.231 1.574-.786 2.132-1.41.56-.626.914-1.279 1.039-1.638.199-.575.356-1.54.428-2.59z" />
+                                            </svg>
+
+
+
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"
+                                                fill="currentColor" class="bi bi-hand-thumbs-down-fill"
+                                                viewBox="0 0 16 16" role="button"
+                                                v-on:click="downVote(answer.answerID)">
+                                                <path
+                                                    d="M6.956 14.534c.065.936.952 1.659 1.908 1.42l.261-.065a1.378 1.378 0 0 0 1.012-.965c.22-.816.533-2.512.062-4.51.136.02.285.037.443.051.713.065 1.669.071 2.516-.211.518-.173.994-.68 1.2-1.272a1.896 1.896 0 0 0-.234-1.734c.058-.118.103-.242.138-.362.077-.27.113-.568.113-.856 0-.29-.036-.586-.113-.857a2.094 2.094 0 0 0-.16-.403c.169-.387.107-.82-.003-1.149a3.162 3.162 0 0 0-.488-.9c.054-.153.076-.313.076-.465a1.86 1.86 0 0 0-.253-.912C13.1.757 12.437.28 11.5.28H8c-.605 0-1.07.08-1.466.217a4.823 4.823 0 0 0-.97.485l-.048.029c-.504.308-.999.61-2.068.723C2.682 1.815 2 2.434 2 3.279v4c0 .851.685 1.433 1.357 1.616.849.232 1.574.787 2.132 1.41.56.626.914 1.28 1.039 1.638.199.575.356 1.54.428 2.591z" />
+                                            </svg>&nbsp;{{answers.downvote}}
+
+                                    </div>
+<!--EDIT ANSWER BTN   -->
+                                        <div v-if="currentLoggedInUser.user.role == 'Contributor' && currentLoggedInUser.user.username == answer.username"
+                                        style="color: white; width: 10em; " v-on:click = "showAnswerInUpdateForm(answers.answerID)">
+                                            <button>
+                                                Edit Answer
+                                            </button>
+                                        </div>
+
+
+
+
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="container">
+
+                    <!-- Update answer done -->
+                    <div class="modal fade" id="updateAnswerModal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" style="color:black; padding: 9px; margin: 1px 35% 0px auto;border-style: solid double solid double;border-width: 8px; 
+                                border-color: rgba(0, 0, 0, 0.664);
+                                box-shadow: 2px 2px 4px 0px #000000;font-family:myFirstFont;">Edit Answer</h5>
+                                </div>
+                                <div class="modal-body" style="max-height:inherit; max-width: 98%;">
+                                    <form id="formUpdate"
+                                        style="border:0; font-family: myFirstFont; margin:0 3px 0 3px;">
+                                        <div class="form-group" style="margin-top: 0;">
+                                            <label style="color: black;" for="answerID">Id:</label>
+                                            <input style="color: black;" type="text" class="form-control" name="answerID"
+                                                id="answerID" readonly>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label style="color: black;" for="username">Username: </label>
+                                            <input style="color: black;" type="text" class="form-control"
+                                                name="username" id="username" readonly>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label style="color: black;" for="ext">
+                                                Text: </label>
+                                            <input style="color: black;" type="text" class="form-control"
+                                                name="text" id="text">
+                                        </div>
+
+
+                                        <!-- All buttons for update answ form -->
+                                         <div class="form-group"
+                                            style="align-content: center; margin-top: 10px;max-width: 70%;max-height: 50%;">
+                                          <!--  -- Update question -->
+                                            <input type="button" class="btn float-right" value="Update"
+                                                v-on:click="updateAnswer()"
+                                                style=" width: auto; background-color: #384144c2; color: white; margin-bottom: 10px; ">
+
+                                           <!-- Delete answ -->
+                                            <button type="button" class="btn float-left" v-on:click="deleteAnswer"
+                                            style=" width: auto; background-color: #384144c2; color: white; margin-bottom: 17px; ">Delete</button>
+
+                                        </div> 
+                                        <button type="button" class="btn float-left text-center"
+                                            data-dismiss="modal" v-on:click="resetMessage"
+                                            style="background-color: #384144c2; color: white;  margin: 0;">
+                                            Close</button>
+
+                                </div>
+
+
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+        </div>
+
+
+        
+                <!-- FAQS START -->
+
+                   
+
+
+            </div> <!--  <div v-if="isConsumerOrSuperAdmin == true"> END  -->
+
+                <div>
+
+                    <div v-if="currentLoggedInUser.user.role == 'Consumer'">
+                
+                        <div class="card-body"
+                            style="float: right; margin-top: 5em; margin-right: -9em;width: 92em; min-width:min-content">
+                            <div class="form-group" style="margin-bottom: 40px;">
+                                <h4 style="margin-left: 28em;">FAQ</h4> <br>
+                                <label style="color: white; margin-left: 70em;" for="qCategory">Category: </label>
+                                <select style="color: white; float: right;max-width: 150px; margin-right: 2.4em;"
+                                    type="text" class="form-control" name="qCategory" id="qCategory">
+                                    <option v-on:click="getFaqfromCat(cat.qCategory)" style="background-color: black;"
+                                        v-for="cat in categories">{{cat.qCategory }}</option>
+                                    <option v-on:click="getQuestionsForFaq()" style="background-color: black;">All</option>
+                                </select>
+                            </div>
+                
+                
+                            <table class="table table-sm table-responsive-lg table-striped table-hover"
+                                style="float: initial;">
+                                <thead>
+                                    <tr style="text-align: left; margin-bottom: 2em;">
+                                        <th scope="col" style="color: white;"></th>
+                                        <th scope="col" style="color: white;">Title</th>
+                                        <th scope="col" style="color: white;">Question</th>
+                                        <th scope="col" style="color: white;">Category</th>
+                                        <th scope="col" style="color: white;">Date of question</th>
+                                        <th scope="col" style="color: white;">User</th>
+                                        <th scope="col" style="color: white;">Answers</th>
+                
+                                    </tr>
+                                </thead>
+                
+                                <tbody v-for="FAQs in FaqbyCat">
+                
+                                    <!--Shows Duplicate questions as FAQ-->
+                                    <tr v-if="FAQs.qDuplicate == 'Duplicate'"
+                                        style="align-content: space-between; align-self:left;color: white;">
+                
+                
+                                        <th scope="row" style="width: min-content;">
+                
+                                        <td>{{ FAQs.qTitle }}</td>
+                                        <td>{{ FAQs.qText }}</td>
+                                        <td>{{ FAQs.qCategory }}</td>
+                                        <td>{{ FAQs.date }}</td>
+                                        <td>{{ FAQs.username }}</td>
+                
+                                        <td>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                                fill="currentColor" viewBox="0 0 16 16" data-toggle="collapse"
+                                                href="#multiCollapseExample1" role="button" aria-expanded="true"
+                                                aria-controls="multiCollapseExample1" v-on:click="getAnswerForFaqs(FAQs.qID)"
+                                                style="margin-left:10%; margin-top: 1%;">
+                                                <path
+                                                    d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z" />
+                                            </svg>
+                                        </td>
+                
+                
+                                        </th>
+                                    </tr>
+                                </tbody>
+                
+                            </table>
+                
+                
+                            <div class="container">
+                
+                               <!--   v-bind="answer.answerID" -->
+                                <div class="panel-group" id="accordion"
+                                    style="color:white; margin-left: 1.2em; margin-right: 5x; background-color: rgba(0, 0, 0, 0); ">
+                
+                                    <div class="card" id="accordion" v-for="FAQanswer in FAQanswer"
+                                        style="background-color: rgba(0, 0, 0, 0);">
+                
+                
+                                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                                            data-parent="#accordion" v-for="FAQanswers in answers">
+                
+                                            <div class="card card-body" v-if="FAQanswers.answerID == FAQanswer.answerID"
+                                                style="align-self: flex-start; margin-top: 20px; margin-bottom: auto; ">
+                
+                                                <div>
+                
+                                                    <h4> Username: {{ FAQanswer.username}} </h4>
+                                                    <p style="margin-top: 2px;">Date: {{ FAQanswer.date }}</p>
+                                                    <br>
+                
+                                                    <h4>Answer:</h4>
+                                                    <p class="card card-body" style="text-align: center;">
+                                                        <br><br> {{FAQanswer.answerText}}</p>
+                
+                
+                                                    <div style="margin: auto; margin-top: 10px; margin-left: 35.5em;">
+                                                        &nbsp;{{FAQanswers.upvote}}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                                            fill="currentColor" class="bi bi-hand-thumbs-up-fill"
+                                                            role="button" v-on:click="upVote(FAQanswer.answerID)"
+                                                            viewBox="0 0 16 16"
+                                                            style="align-self:flex-end; margin-right: 1em;">
+                                                            <path style="text-align:flex-end;"
+                                                                d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.964.22.817.533 2.512.062 4.51a9.84 9.84 0 0 1 .443-.05c.713-.065 1.669-.072 2.516.21.518.173.994.68 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.162 3.162 0 0 1-.488.9c.054.153.076.313.076.465 0 .306-.089.626-.253.912C13.1 15.522 12.437 16 11.5 16H8c-.605 0-1.07-.081-1.466-.218a4.826 4.826 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.616.849-.231 1.574-.786 2.132-1.41.56-.626.914-1.279 1.039-1.638.199-.575.356-1.54.428-2.59z" />
+                                                        </svg>
+                
+                
+                
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                                            fill="currentColor" class="bi bi-hand-thumbs-down-fill"
+                                                            viewBox="0 0 16 16" role="button"
+                                                            v-on:click="downVote(FAQanswer.answerID)">
+                                                            <path
+                                                                d="M6.956 14.534c.065.936.952 1.659 1.908 1.42l.261-.065a1.378 1.378 0 0 0 1.012-.965c.22-.816.533-2.512.062-4.51.136.02.285.037.443.051.713.065 1.669.071 2.516-.211.518-.173.994-.68 1.2-1.272a1.896 1.896 0 0 0-.234-1.734c.058-.118.103-.242.138-.362.077-.27.113-.568.113-.856 0-.29-.036-.586-.113-.857a2.094 2.094 0 0 0-.16-.403c.169-.387.107-.82-.003-1.149a3.162 3.162 0 0 0-.488-.9c.054-.153.076-.313.076-.465a1.86 1.86 0 0 0-.253-.912C13.1.757 12.437.28 11.5.28H8c-.605 0-1.07.08-1.466.217a4.823 4.823 0 0 0-.97.485l-.048.029c-.504.308-.999.61-2.068.723C2.682 1.815 2 2.434 2 3.279v4c0 .851.685 1.433 1.357 1.616.849.232 1.574.787 2.132 1.41.56.626.914 1.28 1.039 1.638.199.575.356 1.54.428 2.591z" />
+                                                        </svg>&nbsp;{{FAQanswers.downvote}}
+                                                    </div>
+                
+                
+                                                </div>
+                
+                
+                                            </div>
+                
+                
+                                        </div>
+                                    </div>
+                
+                                </div>
+                
+                            </div> 
+                
+                        </div>
+                
+                
+                
+                        <!-- FAQS end -->
+                
+                
+                
+                
+                
+                
+                
+                
+                </div> 
+                
+
+
+        </div>
+
+
+    </div>
+
+    </div> <!-- v-if="currentLoggedInUser.loggedin == true" END-->
+    </div>
+    <!-------------------------------------------------id=app END--------------------------------------------------------------------------->
+
+    <script src="http://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,159 @@
+
+
+POST http://localhost:3055/question/answer/contributor
+Content-Type: application/json
+
+{
+
+"id":"1",
+    "answerText":"Just adding a wuestion to se if the db sets values for up and down votes to 0 from the bigining instead of NULL values."
+
+
+}
+
+###
+
+
+GET http://localhost:3055/question/1/
+Content-Type: application/json
+
+{
+
+
+
+}
+
+###
+
+###
+GET http://localhost:3055/api/thisUser/contributor/
+Content-Type: application/json
+
+{
+
+
+
+}
+
+###
+
+
+###
+PATCH http://localhost:3055/question/1
+Content-Type: application/json
+
+{
+    "qTitle":"Title",
+    "qText":"Text",
+    "qCategory":"NewCategory"
+    
+}
+
+###
+DELETE  http://localhost:3055/question/delete/2
+Content-Type: application/json
+
+{
+
+
+
+}
+###
+POST http://localhost:3055/question/Consumer
+Content-Type: application/json
+
+{
+
+    "qTitle": "My second question",
+    "qText":"i am just wondering what time it is tbh",
+    "qCategory":"Snow"
+
+
+
+}
+
+###
+POST http://localhost:3055/question/Consumer
+Content-Type: application/json
+
+{
+
+    "qTitle": "My second question",
+    "qText":"looking to se if it is marked as duplicated after its added",
+    "qCategory":"Snow"
+
+
+
+}
+###
+
+
+
+GET http://localhost:3055/question/answer/2
+Content-Type: application/json
+
+{
+
+
+
+}
+###
+
+
+GET http://localhost:3055/questions/filter/Random
+Content-Type: application/json
+
+{
+
+
+
+}
+
+###
+
+GET http://localhost:3055/questions/allCategories
+Content-Type: application/json
+
+
+
+###
+GET http://localhost:3055/questions/user/Consumer/
+Content-Type: application/json
+
+{
+
+
+
+}
+
+
+###
+PATCH http://localhost:3055/updateAnswer
+Content-Type: application/json
+
+{
+    "answerText":"First updated answer",
+    "answerID":"5"
+   
+    
+}
+
+###
+PATCH http://localhost:3055/updateAnswer
+Content-Type: application/json
+
+{
+    "answerText":"Second updated answer",
+    "answerID":"8"
+   
+    
+}
+###
+DELETE  http://localhost:3055/answer/delete/8
+Content-Type: application/json
+
+{
+
+
+
+}
