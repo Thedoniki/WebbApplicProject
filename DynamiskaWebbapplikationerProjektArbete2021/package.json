@@ -19,7 +19,7 @@
     "passport": "^0.4.1",
     "path": "^0.12.7",
     "sqlite": "^4.0.19",
-    "sqlite3": "^5.0.1"
+    "sqlite3": "^5.1.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
