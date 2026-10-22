@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&A-forum – klickbar prototyp</title>
+<style>
+  :root { --primary:#2b5876; --accent:#4e4376; --bg:#f5f6f8; --card:#fff; --text:#222; --muted:#666; --danger:#b03a2e; --ok:#2e7d32; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  header { background:var(--primary); color:#fff; padding:14px 24px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  header .logo { font-weight:700; font-size:1.2rem; cursor:pointer; }
+  header .sp { flex:1; }
+  header select { padding:6px; border-radius:6px; border:0; }
+  nav.tabs { display:flex; gap:6px; padding:10px 24px 0; flex-wrap:wrap; }
+  nav.tabs button { border:0; background:#dde3ea; padding:8px 14px; border-radius:6px 6px 0 0; cursor:pointer; }
+  nav.tabs button.on { background:var(--card); font-weight:600; }
+  main { max-width:900px; margin:0 auto; padding:16px 24px 40px; }
+  .card { background:var(--card); border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,.08); padding:16px; margin-bottom:12px; }
+  .btn { padding:8px 14px; border:0; border-radius:6px; background:var(--primary); color:#fff; cursor:pointer; font-size:.95rem; }
+  .btn:hover { background:var(--accent); }
+  .btn.sec { background:#dde3ea; color:var(--text); }
+  .btn.danger { background:var(--danger); }
+  .muted { color:var(--muted); font-size:.88rem; }
+  .tag { display:inline-block; background:#e8eef5; color:var(--primary); border-radius:12px; padding:2px 10px; font-size:.8rem; margin-right:6px; }
+  .tag.dup { background:#fff3cd; color:#7a5b00; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  h3 { margin:6px 0; }
+  .q { cursor:pointer; }
+  .q:hover { box-shadow:0 2px 6px rgba(0,0,0,.15); }
+  input, textarea, select.f { width:100%; padding:9px; border:1px solid #cfd6df; border-radius:6px; font:inherit; margin-bottom:10px; }
+  label { font-size:.85rem; color:var(--muted); display:block; margin-bottom:3px; }
+  .vote button { border:1px solid #cfd6df; background:#fff; border-radius:6px; padding:4px 10px; cursor:pointer; margin-left:6px; }
+  .msg { padding:10px 12px; border-radius:6px; margin-bottom:12px; background:#e8f5e9; color:var(--ok); display:none; }
+  table { width:100%; border-collapse:collapse; }
+  td, th { text-align:left; padding:8px; border-bottom:1px solid #eee; }
+  .banned { color:var(--danger); font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo" onclick="go('list')">Forum</span>
+  <span class="sp"></span>
+  <label style="color:#fff;margin:0">Inloggad som
+    <select id="role" onchange="setRole(this.value)">
+      <option value="Consumer">Consumer</option>
+      <option value="Contributor">Contributor</option>
+      <option value="Super Admin">Super Admin</option>
+    </select>
+  </label>
+</header>
+<nav class="tabs" id="tabs"></nav>
+<main><div class="msg" id="msg"></div><div id="app"></div></main>
+
+<script>
+  // Exempeldata. Allt sparas bara i minnet.
+  let role = 'Consumer';
+  const me = () => ({ 'Consumer':'konsumenten', 'Contributor':'bidragsgivaren', 'Super Admin':'admin' }[role]);
+  const questions = [
+    { id:1, title:'Hur startar jag servern?', text:'Jag får ett felmeddelande när jag kör npm start.', category:'Teknik', user:'anna', dup:false },
+    { id:2, title:'Vad är en session?', text:'Hur fungerar inloggning med express-session?', category:'Teknik', user:'bo', dup:false },
+    { id:3, title:'Hur ändrar jag mitt lösenord?', text:'Var hittar jag inställningarna?', category:'Konto', user:'cia', dup:true }
+  ];
+  const answers = [
+    { id:1, q:1, user:'contributor', text:'Kör npm install först och sedan npm start.', up:3, down:0 },
+    { id:2, q:2, user:'contributor', text:'En session lagrar användarens inloggning på servern.', up:1, down:1 }
+  ];
+  const users = [
+    { id:1, name:'anna', role:'Consumer', banned:false },
+    { id:2, name:'contributor', role:'Contributor', banned:false },
+    { id:3, name:'bo', role:'Consumer', banned:false }
+  ];
+  let view = 'list', param = null, tab = 'questions', cat = '';
+  const app = document.getElementById('app');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function go(v, p) { view = v; param = p ?? null; if (['list','faq','admin'].includes(v)) tab = v === 'list' ? 'questions' : v; render(); }
+  function setRole(r) { role = r; if (view === 'admin' && r !== 'Super Admin') view = 'list'; render(); }
+  function flash(t) { const m = document.getElementById('msg'); m.textContent = t; m.style.display = 'block'; setTimeout(() => m.style.display = 'none', 2500); }
+
+  function renderTabs() {
+    const t = [['questions','Frågor','list'], ['faq','FAQ','faq']];
+    if (role === 'Super Admin') t.push(['admin','Användare','admin']);
+    document.getElementById('tabs').innerHTML = t.map(x => `<button class="${tab===x[0]?'on':''}" onclick="go('${x[2]}')">${x[1]}</button>`).join('');
+  }
+
+  function listView(faqOnly) {
+    const cats = [...new Set(questions.map(q => q.category))];
+    const list = questions.filter(q => (faqOnly ? q.dup : true) && (!cat || q.category === cat));
+    return `
+      <div class="row card">
+        <div>
+          <label>Kategori</label>
+          <select class="f" style="width:auto;margin:0" onchange="cat=this.value;render()">
+            <option value="">Alla</option>${cats.map(c => `<option ${c===cat?'selected':''}>${esc(c)}</option>`).join('')}
+          </select>
+        </div>
+        ${faqOnly ? '' : '<button class="btn" onclick="go(\'ask\')">+ Ställ en fråga</button>'}
+      </div>
+      ${list.map(q => `
+        <div class="card q" onclick="go('detail',${q.id})">
+          <span class="tag">${esc(q.category)}</span>${q.dup ? '<span class="tag dup">Dubblett</span>' : ''}
+          <h3>${esc(q.title)}</h3>
+          <div class="muted">${esc(q.text)}</div>
+          <div class="muted" style="margin-top:6px">av ${esc(q.user)} · ${answers.filter(a => a.q === q.id).length} svar</div>
+        </div>`).join('') || '<p class="muted">Inga frågor.</p>'}`;
+  }
+
+  function detailView(id) {
+    const q = questions.find(x => x.id === id);
+    if (!q) return '<p>Frågan finns inte.</p>';
+    const as = answers.filter(a => a.q === id);
+    return `
+      <div class="card">
+        <div class="row"><div><span class="tag">${esc(q.category)}</span>${q.dup ? '<span class="tag dup">Dubblett</span>' : ''}</div>
+          <div>
+            <button class="btn sec" onclick="dupQ(${q.id})">Markera dubblett</button>
+            <button class="btn danger" onclick="delQ(${q.id})">Ta bort</button>
+          </div></div>
+        <h2>${esc(q.title)}</h2><p>${esc(q.text)}</p><div class="muted">av ${esc(q.user)}</div>
+      </div>
+      <h3>Svar (${as.length})</h3>
+      ${as.map(a => `
+        <div class="card"><div class="row"><div>${esc(a.text)}<div class="muted">av ${esc(a.user)}</div></div>
+          <div class="vote">
+            <button onclick="vote(${a.id},'up')">▲ ${a.up}</button>
+            <button onclick="vote(${a.id},'down')">▼ ${a.down}</button>
+          </div></div></div>`).join('') || '<p class="muted">Inga svar än.</p>'}
+      ${role === 'Consumer' ? '<p class="muted">Bara bidragsgivare och administratörer kan svara.</p>' : `
+      <div class="card"><label>Ditt svar</label><textarea id="ans" rows="3"></textarea>
+        <button class="btn" onclick="addAnswer(${q.id})">Skicka</button></div>`}
+      <button class="btn sec" onclick="go('list')">Tillbaka</button>`;
+  }
+
+  function askView() {
+    return `<div class="card"><h2>Ställ en fråga</h2>
+      <label>Titel</label><input id="t" maxlength="30">
+      <label>Text</label><textarea id="x" rows="4"></textarea>
+      <label>Kategori</label><input id="c" maxlength="15" value="Teknik">
+      <div class="row"><button class="btn sec" onclick="go('list')">Avbryt</button><button class="btn" onclick="addQ()">Skicka</button></div></div>`;
+  }
+
+  function adminView() {
+    if (role !== 'Super Admin') return '<p>Bara Super Admin har åtkomst.</p>';
+    return `<div class="card"><div class="row"><h2>Användare</h2>
+      <button class="btn" onclick="addContributor()">+ Ny bidragsgivare</button></div>
+      <table><tr><th>Namn</th><th>Roll</th><th>Status</th><th></th></tr>
+      ${users.map(u => `<tr><td>${esc(u.name)}</td><td>${esc(u.role)}</td>
+        <td class="${u.banned?'banned':''}">${u.banned?'Banned':'Active'}</td>
+        <td><button class="btn sec" onclick="ban(${u.id})">${u.banned?'Avbanna':'Banna'}</button>
+            <button class="btn danger" onclick="delU(${u.id})">Ta bort</button></td></tr>`).join('')}</table></div>`;
+  }
+
+  function addQ() {
+    const t = document.getElementById('t').value.trim(), x = document.getElementById('x').value.trim(), c = document.getElementById('c').value.trim();
+    if (!t || !x || !c) return alert('Fyll i titel, text och kategori.');
+    questions.push({ id: Date.now(), title:t, text:x, category:c, user:me(), dup:false });
+    flash('Frågan är skickad.'); go('list');
+  }
+  function addAnswer(qid) {
+    const v = document.getElementById('ans').value.trim();
+    if (!v) return alert('Skriv ett svar.');
+    answers.push({ id: Date.now(), q:qid, user:me(), text:v, up:0, down:0 }); render();
+  }
+  function vote(id, d) { const a = answers.find(x => x.id === id); a[d] += 1; render(); }
+  function dupQ(id) { questions.find(q => q.id === id).dup = true; flash('Markerad som dubblett. Den visas nu i FAQ.'); render(); }
+  function delQ(id) { if (!confirm('Ta bort frågan?')) return; questions.splice(questions.findIndex(q => q.id === id), 1); go('list'); }
+  function ban(id) { const u = users.find(x => x.id === id); u.banned = !u.banned; render(); }
+  function delU(id) { if (confirm('Ta bort användaren?')) { users.splice(users.findIndex(u => u.id === id), 1); render(); } }
+  function addContributor() { const n = prompt('Användarnamn för ny bidragsgivare:'); if (n) { users.push({ id: Date.now(), name:n, role:'Contributor', banned:false }); render(); } }
+
+  function render() {
+    renderTabs();
+    app.innerHTML = view === 'list' ? listView(false)
+      : view === 'faq' ? listView(true)
+      : view === 'detail' ? detailView(param)
+      : view === 'ask' ? askView()
+      : view === 'admin' ? adminView() : '';
+  }
+  render();
+</script>
+</body>
+</html>
